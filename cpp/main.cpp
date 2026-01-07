@@ -1,3 +1,5 @@
+#include "incanti.hpp"
+#include <algorithm>
 #include <iostream>
 #include <random>
 
@@ -142,23 +144,31 @@ void GameLoop(std::string &mode) {
 }
 
 int main(int argc, char *argv[]) {
-  if (argc == 1) {
-    std::cout << "Usage: ./main mode" << std::endl;
-    std::cout << "Mode = easy, medium, hard" << std::endl;
-    exit(1);
+  std::string mode;
+
+  Incanti::Parser p;
+
+  p >> arg("mode", "m", &mode) | required | "mode: easy, medium, hard" |
+      [](const std::string &s) {
+        std::string lower = s;
+        std::transform(lower.begin(), lower.end(), lower.begin(), ::tolower);
+        if (lower != "easy" && lower != "medium" && lower != "hard") {
+          std::cout << "Not a valid mode!" << std::endl;
+          while (lower != "easy" && lower != "medium" && lower != "hard") {
+            std::cout << "Enter mode here now[easy, medium, hard]: ";
+            std::cin >> lower;
+          }
+        }
+        GameLoop(lower);
+        return lower;
+      };
+
+  try {
+    p.parse(argc, argv);
+  } catch (const Incanti::ParseError &pe) {
+    std::cerr << "Error: " << pe.what() << std::endl;
+    p.print_help();
   }
-
-  std::string mode = argv[1];
-
-  if (mode != "easy" || mode != "medium" || mode != "hard") {
-    std::cout << "Not a valid mode!" << std::endl;
-    while (mode != "easy" && mode != "medium" && mode != "hard") {
-      std::cout << "Enter mode here now[easy, medium, hard]: ";
-      std::cin >> mode;
-    }
-  }
-
-  GameLoop(mode);
 
   return 0;
 }
