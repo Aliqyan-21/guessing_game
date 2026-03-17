@@ -13,3 +13,4 @@ Implemented in different langauges.
 - [x] PASCAL
 - [x] Seed7
 - [x] Nim
+- [x] Bash
